@@ -52,9 +52,9 @@ sisav2/
 
 ## Documentação do trabalho
 
-Backlog, decisões e atas ficam em **Linear** e no **Drive** (não versionados aqui).
-As fontes ficam localmente em `_entrega/` (gitignored). O repositório mantém
-apenas código, o README e os diagramas PlantUML em `docs/diagramas/`.
+A documentação (requisitos, decisões, atas) fica no **Notion**; o tracking
+Scrum (backlog e sprint) fica no **Linear**. O repositório mantém apenas
+código, o README e os diagramas PlantUML em `docs/diagramas/`.
 
 ## Equipe
 
@@ -63,5 +63,5 @@ Gabrielly Bianka Ferreira da Mata · João Vitor Bidoia Angelo
 
 ## Links
 
+- Notion: a preencher
 - Linear: a preencher
-- Google Drive: a preencher
