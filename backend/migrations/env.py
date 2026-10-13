@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from sisav.core.config import get_settings
 from sisav.core.db import Base
-from sisav.usuarios.models import Usuario
+from sisav.usuarios.models import Usuario  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().database_url)
