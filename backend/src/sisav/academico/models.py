@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sisav.core.db import Base
-
+from sisav.usuarios.models import Usuario  # Importando o modelo para a relação
 
 class Disciplina(Base):
     __tablename__ = "disciplinas"
@@ -26,11 +26,10 @@ class Turma(Base):
     horario_fim: Mapped[str] = mapped_column(String(5), nullable=False)
 
     disciplina_id: Mapped[int] = mapped_column(ForeignKey("disciplinas.id"), nullable=False)
-    professor_id: Mapped[int | None] = mapped_column(
-        ForeignKey("usuarios.id"), nullable=True
-    )
+    professor_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
 
     disciplina: Mapped["Disciplina"] = relationship(back_populates="turmas")
+    professor: Mapped["Usuario"] = relationship(foreign_keys=[professor_id])
 
 
 class Matricula(Base):
@@ -40,3 +39,6 @@ class Matricula(Base):
     aluno_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"), nullable=False)
     turma_id: Mapped[int] = mapped_column(ForeignKey("turmas.id"), nullable=False)
     ano_letivo: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    aluno: Mapped["Usuario"] = relationship(foreign_keys=[aluno_id])
+    turma: Mapped["Turma"] = relationship()

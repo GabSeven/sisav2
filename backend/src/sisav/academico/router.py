@@ -56,3 +56,37 @@ async def obter_horario_aluno(
         for turma, nome_disciplina in rows
     ]
     return GradeHorariaResponse(semestre=semestre, aulas=aulas)
+
+
+@router.get("/professores/me/turmas", response_model=GradeHorariaResponse)
+async def obter_turmas_professor(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    professor_id: int = 2, # TODO: Ajustar para o Depends() da auth futuramente
+    semestre: Annotated[str, Query(pattern=r"^\d{4}\.[12]$")] = "2026.1",
+) -> GradeHorariaResponse:
+    ordem_dia = case(ORDEM_DIAS, value=Turma.dia_semana, else_=99)
+    
+    query = (
+        select(Turma, Disciplina.nome.label("nome_disciplina"))
+        .join(Disciplina, Turma.disciplina_id == Disciplina.id)
+        .where(Turma.professor_id == professor_id)
+        .where(Turma.semestre == semestre)
+        .order_by(ordem_dia, Turma.horario_inicio)
+    )
+
+    rows = (await db.execute(query)).all()
+
+    turmas_lista = [
+        AulaHorarioResponse(
+            id_turma=turma.id,
+            codigo_turma=turma.codigo,
+            nome_disciplina=nome_disciplina,
+            sala=turma.sala,
+            dia_semana=turma.dia_semana,
+            horario_inicio=turma.horario_inicio,
+            horario_fim=turma.horario_fim,
+        )
+        for turma, nome_disciplina in rows
+    ]
+    
+    return GradeHorariaResponse(semestre=semestre, aulas=turmas_lista)
