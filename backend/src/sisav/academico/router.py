@@ -1,44 +1,58 @@
+from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sisav.academico.dependencies import get_current_aluno_id
 from sisav.academico.models import Disciplina, Matricula, Turma
 from sisav.academico.schemas import AulaHorarioResponse, GradeHorariaResponse
 from sisav.core.db import get_db
 
 router = APIRouter(prefix="/academico", tags=["Acadêmico"])
 
+ORDEM_DIAS = {
+    "segunda": 1, "terca": 2, "quarta": 3,
+    "quinta": 4, "sexta": 5, "sabado": 6, "domingo": 7,
+}
+
+
+def semestre_atual() -> str:
+    hoje = date.today()
+    return f"{hoje.year}.{1 if hoje.month <= 6 else 2}"
+
 
 @router.get("/alunos/me/horario", response_model=GradeHorariaResponse)
 async def obter_horario_aluno(
     db: Annotated[AsyncSession, Depends(get_db)],
-    semestre: str = "2026.1",
+    aluno_id: Annotated[int, Depends(get_current_aluno_id)],
+    semestre: Annotated[str | None, Query(pattern=r"^\d{4}\.[12]$")] = None,
 ) -> GradeHorariaResponse:
-    # TODO: Obter o id a partir do token JWT de quem estiver logado.
-    aluno_mock_id = 0
+    semestre = semestre or semestre_atual()
+    ordem_dia = case(ORDEM_DIAS, value=Turma.dia_semana, else_=99)
 
     query = (
         select(Turma, Disciplina.nome.label("nome_disciplina"))
         .join(Matricula, Matricula.turma_id == Turma.id)
         .join(Disciplina, Turma.disciplina_id == Disciplina.id)
-        .where(Matricula.aluno_id == aluno_mock_id)
+        .where(Matricula.aluno_id == aluno_id)
         .where(Turma.semestre == semestre)
+        .order_by(ordem_dia, Turma.horario_inicio)
     )
 
-    result = await db.execute(query)
-    rows = result.all()
+    rows = (await db.execute(query)).all()
 
     aulas = [
         AulaHorarioResponse(
             id_turma=turma.id,
+            codigo_turma=turma.codigo,
             nome_disciplina=nome_disciplina,
+            sala=turma.sala,
             dia_semana=turma.dia_semana,
             horario_inicio=turma.horario_inicio,
             horario_fim=turma.horario_fim,
         )
         for turma, nome_disciplina in rows
     ]
-
     return GradeHorariaResponse(semestre=semestre, aulas=aulas)
