@@ -1,13 +1,21 @@
+import sys
+import os
+from os.path import dirname, abspath
+
+# 1. Ajusta o caminho para o terminal encontrar o código
+sys.path.insert(0, abspath(os.path.join(dirname(__file__), '..', 'src')))
+
 import asyncio
 from logging.config import fileConfig
-
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+# 2. Importa as configurações e os modelos (ignora o aviso amarelo do VS Code!)
 from sisav.core.config import get_settings
-from sisav.core.db import Base
+from sisav.core.database import Base
+from sisav.models.academico import Disciplina, Turma, Matricula
 
 config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().database_url)
@@ -16,7 +24,6 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
-
 
 def run_migrations_offline() -> None:
     url = get_settings().database_url
