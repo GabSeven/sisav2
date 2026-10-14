@@ -44,13 +44,16 @@ class Matricula(Base):
     aluno: Mapped["Usuario"] = relationship(foreign_keys=[aluno_id])
     turma: Mapped["Turma"] = relationship()
 
+
 class Avaliacao(Base):
     __tablename__ = "avaliacoes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    nome: Mapped[str] = mapped_column(String(100), nullable=False) # Ex: "Prova 1", "Trabalho Final"
+    nome: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )  # Ex: "Prova 1", "Trabalho Final"
     peso: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
-    
+
     turma_id: Mapped[int] = mapped_column(ForeignKey("turmas.id"), nullable=False)
 
     turma: Mapped["Turma"] = relationship()
@@ -62,7 +65,7 @@ class Nota(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     valor: Mapped[float] = mapped_column(Float, nullable=False)
-    
+
     avaliacao_id: Mapped[int] = mapped_column(ForeignKey("avaliacoes.id"), nullable=False)
     matricula_id: Mapped[int] = mapped_column(ForeignKey("matriculas.id"), nullable=False)
 
