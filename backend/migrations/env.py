@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from sisav.academico.models import Disciplina, Matricula, Turma  # noqa: F401
 from sisav.core.config import get_settings
 from sisav.core.db import Base
 from sisav.usuarios.models import Usuario  # noqa: F401
