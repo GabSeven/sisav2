@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sisav.academico.dependencies import get_current_aluno_id
 from sisav.academico.models import Disciplina, Matricula, Turma
 from sisav.academico.schemas import AulaHorarioResponse, GradeHorariaResponse
 from sisav.core.db import get_db
+from sisav.auth.dependencies import get_current_user_id
 
 router = APIRouter(prefix="/academico", tags=["Acadêmico"])
 
@@ -26,7 +26,7 @@ def semestre_atual() -> str:
 @router.get("/alunos/me/horario", response_model=GradeHorariaResponse)
 async def obter_horario_aluno(
     db: Annotated[AsyncSession, Depends(get_db)],
-    aluno_id: Annotated[int, Depends(get_current_aluno_id)],
+    aluno_id: Annotated[int, Depends(get_current_user_id)],
     semestre: Annotated[str | None, Query(pattern=r"^\d{4}\.[12]$")] = None,
 ) -> GradeHorariaResponse:
     semestre = semestre or semestre_atual()
@@ -61,7 +61,7 @@ async def obter_horario_aluno(
 @router.get("/professores/me/turmas", response_model=GradeHorariaResponse)
 async def obter_turmas_professor(
     db: Annotated[AsyncSession, Depends(get_db)],
-    professor_id: int = 2, # TODO: Ajustar para o Depends() da auth futuramente
+    professor_id: Annotated[int, Depends(get_current_user_id)],
     semestre: Annotated[str, Query(pattern=r"^\d{4}\.[12]$")] = "2026.1",
 ) -> GradeHorariaResponse:
     ordem_dia = case(ORDEM_DIAS, value=Turma.dia_semana, else_=99)
