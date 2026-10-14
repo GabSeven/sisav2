@@ -4,11 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
-export type Credenciais = {
-  nomeDeUsuario: string
-  senha: string
-}
+import type { Credenciais } from '@/modules/auth/api'
 
 type LoginPageProps = {
   onSubmit?: (credenciais: Credenciais) => Promise<void> | void
@@ -35,8 +31,12 @@ export function LoginPage({ onSubmit }: LoginPageProps) {
     try {
       setEnviando(true)
       await onSubmit({ nomeDeUsuario: nomeDeUsuario.trim(), senha })
-    } catch {
-      setErro('Não foi possível entrar. Verifique o usuário e a senha.')
+    } catch (erro) {
+      setErro(
+        erro instanceof Error
+          ? erro.message
+          : 'Não foi possível entrar. Verifique o usuário e a senha.',
+      )
     } finally {
       setEnviando(false)
     }
