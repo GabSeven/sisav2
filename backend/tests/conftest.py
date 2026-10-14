@@ -1,10 +1,10 @@
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from sisav.academico.dependencies import get_current_aluno_id
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
 from sisav.academico.models import Disciplina, Matricula, Turma
+from sisav.auth.dependencies import get_current_user_id  # <-- Nova importação
 from sisav.core.db import Base, get_db
 from sisav.main import app
 from sisav.usuarios.models import Perfil, Usuario
@@ -29,7 +29,7 @@ async def client(session_factory):
             yield session
 
     app.dependency_overrides[get_db] = _get_db
-    app.dependency_overrides[get_current_aluno_id] = lambda: 1
+    app.dependency_overrides[get_current_user_id] = lambda: 1  # <-- Atualizado aqui
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
