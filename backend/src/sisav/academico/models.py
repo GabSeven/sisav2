@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sisav.core.db import Base
@@ -43,3 +43,28 @@ class Matricula(Base):
 
     aluno: Mapped["Usuario"] = relationship(foreign_keys=[aluno_id])
     turma: Mapped["Turma"] = relationship()
+
+class Avaliacao(Base):
+    __tablename__ = "avaliacoes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(100), nullable=False) # Ex: "Prova 1", "Trabalho Final"
+    peso: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    
+    turma_id: Mapped[int] = mapped_column(ForeignKey("turmas.id"), nullable=False)
+
+    turma: Mapped["Turma"] = relationship()
+    notas: Mapped[list["Nota"]] = relationship(back_populates="avaliacao")
+
+
+class Nota(Base):
+    __tablename__ = "notas"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    valor: Mapped[float] = mapped_column(Float, nullable=False)
+    
+    avaliacao_id: Mapped[int] = mapped_column(ForeignKey("avaliacoes.id"), nullable=False)
+    matricula_id: Mapped[int] = mapped_column(ForeignKey("matriculas.id"), nullable=False)
+
+    avaliacao: Mapped["Avaliacao"] = relationship(back_populates="notas")
+    matricula: Mapped["Matricula"] = relationship()
