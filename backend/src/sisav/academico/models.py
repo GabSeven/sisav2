@@ -1,4 +1,6 @@
-from sqlalchemy import Float, ForeignKey, Integer, String
+from datetime import date
+
+from sqlalchemy import Date, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sisav.core.db import Base
@@ -67,4 +69,15 @@ class Nota(Base):
     matricula_id: Mapped[int] = mapped_column(ForeignKey("matriculas.id"), nullable=False)
 
     avaliacao: Mapped["Avaliacao"] = relationship(back_populates="notas")
+    matricula: Mapped["Matricula"] = relationship()
+
+class RegistroFrequencia(Base):
+    __tablename__ = "registros_frequencia"
+    __table_args__ = (UniqueConstraint("matricula_id", "data"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    matricula_id: Mapped[int] = mapped_column(ForeignKey("matriculas.id"), nullable=False)
+    data: Mapped[date] = mapped_column(Date, nullable=False)
+    faltas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
     matricula: Mapped["Matricula"] = relationship()
