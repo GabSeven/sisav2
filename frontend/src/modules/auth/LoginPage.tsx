@@ -43,75 +43,124 @@ export function LoginPage({ onSubmit }: LoginPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4 py-10 text-neutral-900">
-      <main className="w-full max-w-sm sm:rounded-2xl sm:border sm:border-neutral-200 sm:bg-white sm:p-8 sm:shadow-sm">
-        <header className="mb-8 flex flex-col items-center text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 text-white">
-            <GraduationCap className="h-6 w-6" aria-hidden="true" />
+    <div className="flex min-h-screen bg-slate-100">
+      <aside className="hidden w-1/2 flex-col justify-between bg-slate-900 p-12 text-white lg:flex">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-700">
+            <GraduationCap className="h-5 w-5" aria-hidden="true" />
           </span>
-          <h1 className="mt-4 text-2xl font-semibold">SISAV 2</h1>
-          <p className="mt-1 text-sm text-neutral-500">Serviços acadêmicos da UEM</p>
-        </header>
-
-        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-          <div className="space-y-2">
-            <Label htmlFor="nome-de-usuario">Usuário</Label>
-            <Input
-              id="nome-de-usuario"
-              name="nomeDeUsuario"
-              autoComplete="username"
-              autoCapitalize="none"
-              autoCorrect="off"
-              placeholder="nome.de.usuario"
-              value={nomeDeUsuario}
-              onChange={(event) => setNomeDeUsuario(event.target.value)}
-              aria-invalid={erro !== null}
-              disabled={enviando}
-            />
+          <div>
+            <p className="font-display text-lg font-bold">SISAV 2</p>
+            <p className="text-[11px] text-slate-500">Universidade Estadual de Maringá</p>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="senha">Senha</Label>
-            <div className="relative">
-              <Input
-                id="senha"
-                name="senha"
-                type={senhaVisivel ? 'text' : 'password'}
-                autoComplete="current-password"
-                placeholder="••••••••"
-                className="pr-10"
-                value={senha}
-                onChange={(event) => setSenha(event.target.value)}
-                aria-invalid={erro !== null}
-                disabled={enviando}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-neutral-400 hover:text-neutral-600"
-                onClick={() => setSenhaVisivel((visivel) => !visivel)}
-                aria-label={senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'}
-                tabIndex={-1}
-              >
-                {senhaVisivel ? (
-                  <EyeOff className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Eye className="h-4 w-4" aria-hidden="true" />
-                )}
-              </button>
-            </div>
-          </div>
+        <div>
+          <h1 className="font-display text-4xl font-bold leading-tight">
+            SECRETARIA ACADÊMICA
+            <br />
+            VIRTUAL - UEM
+          </h1>
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-slate-400">
+            O sistema Secretaria Acadêmica Virtual (SAV), da Diretoria de Assuntos Acadêmicos
+            (DAA), é o portal onde o acadêmico pode consultar as disciplinas cursadas e os
+            conceitos finais obtidos, obter declarações de matrícula e outros documentos.
+          </p>
+        </div>
 
-          {erro !== null && (
-            <p role="alert" className="text-sm text-red-600">
-              {erro}
+        <p className="text-[11px] text-slate-700">
+          © 2026 UEM · Departamento de Informática · SISAV 2
+        </p>
+      </aside>
+
+      <div className="flex flex-1 items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <h2 className="font-display text-2xl font-bold text-slate-900">Entrar</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Acesse o portal com suas credenciais UEM.
             </p>
-          )}
 
-          <Button type="submit" size="lg" className="w-full" disabled={enviando}>
-            {enviando ? 'Entrando…' : 'Entrar'}
-          </Button>
-        </form>
-      </main>
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
+              <div className="space-y-1.5">
+                <Label htmlFor="nome-de-usuario">Usuário</Label>
+                <Input
+                  id="nome-de-usuario"
+                  name="nomeDeUsuario"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  placeholder="seu.usuario"
+                  value={nomeDeUsuario}
+                  onChange={(event) => setNomeDeUsuario(event.target.value)}
+                  aria-invalid={erro !== null}
+                  disabled={enviando}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="senha">Senha</Label>
+                <div className="relative">
+                  <Input
+                    id="senha"
+                    name="senha"
+                    type={senhaVisivel ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    className="pr-10"
+                    value={senha}
+                    onChange={(event) => setSenha(event.target.value)}
+                    aria-invalid={erro !== null}
+                    disabled={enviando}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 hover:text-slate-600"
+                    onClick={() => setSenhaVisivel((visivel) => !visivel)}
+                    aria-label={senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'}
+                    tabIndex={-1}
+                  >
+                    {senhaVisivel ? (
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {erro !== null && (
+                <p role="alert" className="text-sm text-red-600">
+                  {erro}
+                </p>
+              )}
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-blue-700 hover:underline"
+                >
+                  Esqueceu a senha?
+                </button>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                disabled={enviando}
+              >
+                {enviando ? 'Entrando…' : 'Entrar no Portal'}
+              </Button>
+            </form>
+          </div>
+
+          <p className="mt-4 text-center text-xs text-slate-400">
+            Problemas com o acesso? Contate a secretaria acadêmica.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
