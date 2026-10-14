@@ -1,10 +1,9 @@
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
+from sisav.academico.dependencies import get_current_aluno_id
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
-from sisav.academico.dependencies import get_current_aluno_id
 from sisav.academico.models import Disciplina, Matricula, Turma
 from sisav.core.db import Base, get_db
 from sisav.main import app

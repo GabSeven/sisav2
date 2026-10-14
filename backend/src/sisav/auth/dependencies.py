@@ -11,9 +11,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 def get_current_user_id(token: Annotated[str, Depends(oauth2_scheme)]) -> int:
     try:
         return usuario_id_do_token(token)
-    except TokenInvalido:
+    except TokenInvalido as erro:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido ou expirado.",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from erro

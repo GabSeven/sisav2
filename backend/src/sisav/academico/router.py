@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sisav.academico.models import Disciplina, Matricula, Turma
 from sisav.academico.schemas import AulaHorarioResponse, GradeHorariaResponse
-from sisav.core.db import get_db
 from sisav.auth.dependencies import get_current_user_id
+from sisav.core.db import get_db
 
 router = APIRouter(prefix="/academico", tags=["Acadêmico"])
 

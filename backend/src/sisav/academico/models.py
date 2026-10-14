@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sisav.core.db import Base
 from sisav.usuarios.models import Usuario  # Importando o modelo para a relação
 
+
 class Disciplina(Base):
     __tablename__ = "disciplinas"
 
