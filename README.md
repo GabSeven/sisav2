@@ -9,7 +9,7 @@ Construção de Software 2026.
 |---|---|
 | Backend | Python 3.12 · FastAPI · SQLAlchemy 2.0 (async) · Alembic |
 | Frontend | Vite · React 19 · TypeScript · Tailwind v4 · shadcn/ui |
-| Banco | PostgreSQL 16 |
+| Persistência/Dados | PostgreSQL 16 · FileStore |
 | Infra | Docker Compose · GitHub Actions |
 
 ## Como rodar
@@ -44,10 +44,11 @@ sisav2/
 │       ├─ main.py   # FastAPI + /health
 │       ├─ core/     # config (settings) e db (engine/sessão async, Base)
 │       └─ modules/  # (a criar) domínios do monólito modular
+|   └─ uploads/     # FileStore (Armazenamento local de PDFs e comprovantes)
 ├─ frontend/         # SPA Vite + React
 ├─ .github/          # CI (ruff + pytest + typecheck/build)
 ├─ docker-compose.yml · Makefile · .env.example
-└─ docs/diagramas/   # fontes PlantUML dos diagramas arquiteturais
+└─ docs/diagramas/   # fontes Mermaid dos diagramas arquiteturais
 ```
 
 ## Documentação do trabalho
