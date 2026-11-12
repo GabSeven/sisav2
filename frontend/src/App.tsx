@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { TabelaChamada} from './components/TabelaChamada'
+import { TabelaChamada } from './components/TabelaChamada'
 import type { Aluno } from './components/TabelaChamada'
-import { FecharDisciplina} from './components/FecharDisciplina'
-import type { AlunoConsolidacao } from './components/FecharDisciplina'
-import { PainelNotasFaltasAluno} from './components/PainelNotasFaltasAluno'
+import { FecharDisciplina } from './components/FecharDisciplina'
+import type { TurmaConsolidacao } from './components/FecharDisciplina'
+import { PainelNotasFaltasAluno } from './components/PainelNotasFaltasAluno'
 import type { DisciplinaBoletim } from './components/PainelNotasFaltasAluno'
 
 const alunosTeste: Aluno[] = [
@@ -16,16 +16,29 @@ const alunosTeste: Aluno[] = [
   { id: 7, nome: 'Beltraninho', ra: '140345', faltasAcumuladas: 1 },
 ]
 
-const alunosConsolidacaoTeste: AlunoConsolidacao[] = [
-  { id: 1, nome: 'Daniella Midori Hamada Yamasaki', ra: '139567', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '3/17', situacao: 'Aprovado' },
-  { id: 2, nome: 'João Vitor Bidoia Angelo', ra: '139617', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '6/17', situacao: 'Aprovado' },
-  { id: 3, nome: 'Gabriel Rodrigues Gomes', ra: '139159', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '4/17', situacao: 'Aprovado' },
-  { id: 4, nome: 'Gabrielly Bianka Ferreira da Mata', ra: '140600', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '0/17', situacao: 'Aprovado' },
-  { id: 5, nome: 'Fulaninho', ra: '140123', av1: '5.5', av2: '!', mediaFinal: '5.5', faltas: '9/17', situacao: 'Exame Final' },
-  { id: 6, nome: 'Ciclaninho', ra: '140234', av1: '6.0', av2: '7.5', mediaFinal: '6.8', faltas: '2/17', situacao: 'Exame Final' },
-  { id: 7, nome: 'Zezinho', ra: '140234', av1: '6.0', av2: '7.5', mediaFinal: '6.8', faltas: '20/17', situacao: 'Rep. por Falta' },
+const turmasConsolidacaoTeste: TurmaConsolidacao[] = [
+  {
+    id: 'csof-t01',
+    codigo: 'CSOF401-T01',
+    nome: 'Construção de Software',
+    alunos: [
+      { id: 1, nome: 'Daniella Midori Hamada Yamasaki', ra: '139567', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '3/17', situacao: 'Aprovado' },
+      { id: 2, nome: 'João Vitor Bidoia Angelo', ra: '139617', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '6/17', situacao: 'Aprovado' },
+      { id: 3, nome: 'Gabriel Rodrigues Gomes', ra: '139159', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '4/17', situacao: 'Aprovado' },
+      { id: 4, nome: 'Gabrielly Bianka Ferreira da Mata', ra: '140600', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '0/17', situacao: 'Aprovado' },
+    ],
+  },
+  {
+    id: 'dino-t01',
+    codigo: 'DINO512-T01',
+    nome: 'Banco de Dados',
+    alunos: [
+      { id: 5, nome: 'Fulaninho', ra: '140123', av1: '5.5', av2: '!', mediaFinal: '5.5', faltas: '9/17', situacao: 'Exame Final' },
+      { id: 6, nome: 'Ciclaninho', ra: '140234', av1: '6.0', av2: '7.5', mediaFinal: '6.8', faltas: '2/17', situacao: 'Exame Final' },
+      { id: 7, nome: 'Zezinho', ra: '140345', av1: '6.0', av2: '7.5', mediaFinal: '6.8', faltas: '20/17', situacao: 'Rep. por Falta' },
+    ],
+  },
 ]
-
 
 const disciplinasTeste: DisciplinaBoletim[] = [
   {
@@ -140,13 +153,7 @@ export default function App() {
 
       {/* Renderização condicional */}
       {telaAtiva === 'chamada' && <TabelaChamada alunos={alunosTeste} />}
-      {telaAtiva === 'fechar' && (
-        <FecharDisciplina
-          nomeTurma="Banco de Dados"
-          codigoTurma="DINO512-T01"
-          alunos={alunosConsolidacaoTeste}
-        />
-      )}
+      {telaAtiva === 'fechar' && <FecharDisciplina turmas={turmasConsolidacaoTeste} />}
       {telaAtiva === 'boletim' && <PainelNotasFaltasAluno disciplinas={disciplinasTeste} />}
     </div>
   )
