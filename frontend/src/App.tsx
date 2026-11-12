@@ -1,19 +1,33 @@
 import { useState } from 'react'
 import { TabelaChamada } from './components/TabelaChamada'
-import type { Aluno } from './components/TabelaChamada'
+import type { TurmaChamada } from './components/TabelaChamada'
 import { FecharDisciplina } from './components/FecharDisciplina'
 import type { TurmaConsolidacao } from './components/FecharDisciplina'
 import { PainelNotasFaltasAluno } from './components/PainelNotasFaltasAluno'
 import type { DisciplinaBoletim } from './components/PainelNotasFaltasAluno'
 
-const alunosTeste: Aluno[] = [
-  { id: 1, nome: 'Daniella Midori Hamada Yamasaki', ra: '139567', faltasAcumuladas: 3 },
-  { id: 2, nome: 'João Vitor Bidoia Angelo', ra: '139617', faltasAcumuladas: 6 },
-  { id: 3, nome: 'Gabriel Rodrigues Gomes', ra: '139159', faltasAcumuladas: 4 },
-  { id: 4, nome: 'Gabrielly Bianka Ferreira da Mata', ra: '140600', faltasAcumuladas: 0 },
-  { id: 5, nome: 'Fulaninho', ra: '140123', faltasAcumuladas: 9 },
-  { id: 6, nome: 'Ciclaninho', ra: '140234', faltasAcumuladas: 2 },
-  { id: 7, nome: 'Beltraninho', ra: '140345', faltasAcumuladas: 1 },
+const turmasChamadaTeste: TurmaChamada[] = [
+  {
+    id: 1,
+    nome: 'Construção de Software 1',
+    ano: '4º Ano',
+    alunos: [
+      { id: 1, nome: 'Daniella Midori Hamada Yamasaki', ra: '139567', faltasAcumuladas: 3 },
+      { id: 2, nome: 'João Vitor Bidoia Angelo', ra: '139617', faltasAcumuladas: 6 },
+      { id: 3, nome: 'Gabriel Rodrigues Gomes', ra: '139159', faltasAcumuladas: 4 },
+      { id: 4, nome: 'Gabrielly Bianka Ferreira da Mata', ra: '140600', faltasAcumuladas: 0 },
+    ],
+  },
+  {
+    id: 2,
+    nome: 'Banco de Dados',
+    ano: '3º Ano',
+    alunos: [
+      { id: 5, nome: 'Fulaninho', ra: '140123', faltasAcumuladas: 9 },
+      { id: 6, nome: 'Ciclaninho', ra: '140234', faltasAcumuladas: 2 },
+      { id: 7, nome: 'Beltraninho', ra: '140345', faltasAcumuladas: 1 },
+    ],
+  },
 ]
 
 const turmasConsolidacaoTeste: TurmaConsolidacao[] = [
@@ -104,7 +118,7 @@ const disciplinasTeste: DisciplinaBoletim[] = [
 ]
 
 export default function App() {
-  const [telaAtiva, setTelaAtiva] = useState<'chamada' | 'fechar' | 'boletim'>('fechar')
+  const [telaAtiva, setTelaAtiva] = useState<'chamada' | 'fechar' | 'boletim'>('chamada')
 
   return (
     <div>
@@ -152,7 +166,7 @@ export default function App() {
       </div>
 
       {/* Renderização condicional */}
-      {telaAtiva === 'chamada' && <TabelaChamada alunos={alunosTeste} />}
+      {telaAtiva === 'chamada' && <TabelaChamada turmas={turmasChamadaTeste} />}
       {telaAtiva === 'fechar' && <FecharDisciplina turmas={turmasConsolidacaoTeste} />}
       {telaAtiva === 'boletim' && <PainelNotasFaltasAluno disciplinas={disciplinasTeste} />}
     </div>
