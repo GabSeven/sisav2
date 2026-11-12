@@ -17,12 +17,9 @@ export function ModalFecharDisciplina({
   onConfirmarFechamento,
   isLoading = false,
 }: ModalFecharDisciplinaProps) {
-  // Estado para a confirmação por checkbox
+
   const [cienteRegras, setCienteRegras] = useState(false)
-
   if (!isOpen) return null
-
-  // Libera a confirmação apenas se o checkbox estiver marcado
   const podeConfirmar = cienteRegras
 
   const handleConfirmar = () => {
