@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ModalFecharDisciplina } from './ModalFecharDisciplina'
-import { Header } from  './Header'
+import { Header } from './Header'
 
 export interface AlunoConsolidacao {
   id: number
@@ -16,24 +16,13 @@ export interface AlunoConsolidacao {
 interface FecharDisciplinaProps {
   nomeTurma?: string
   codigoTurma?: string
-  alunos?: AlunoConsolidacao[]
+  alunos: AlunoConsolidacao[]
 }
-
-const alunosPadrao: AlunoConsolidacao[] = [
-  { id: 1, nome: 'Daniella Midori Hamada Yamasaki', ra: '139567', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '3/17', situacao: 'Aprovado' },
-  { id: 2, nome: 'João Vitor Bidoia Angelo', ra: '139617', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '6/17', situacao: 'Aprovado' },
-  { id: 3, nome: 'Gabriel Rodrigues Gomes', ra: '139159', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '4/17', situacao: 'Aprovado' },
-  { id: 4, nome: 'Gabrielly Bianka Ferreira da Mata', ra: '140600', av1: '10.0', av2: '10.0', mediaFinal: '10.0', faltas: '0/17', situacao: 'Aprovado' },
-  { id: 5, nome: 'Fulaninho', ra: '140123', av1: '5.5', av2: '!', mediaFinal: '5.5', faltas: '9/17', situacao: 'Exame Final' },
-  { id: 6, nome: 'Ciclaninho', ra: '140234', av1: '6.0', av2: '7.5', mediaFinal: '6.8', faltas: '2/17', situacao: 'Exame Final' },
-  { id: 7, nome: 'Zezinho', ra: '140234', av1: '6.0', av2: '7.5', mediaFinal: '6.8', faltas: '20/17', situacao: 'Rep. por Falta' },
-
-]
 
 export function FecharDisciplina({
   nomeTurma = 'Banco de Dados',
   codigoTurma = 'DINO512-T01',
-  alunos = alunosPadrao,
+  alunos,
 }: FecharDisciplinaProps) {
   const [turmaSelecionada, setTurmaSelecionada] = useState('Construção de Software')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -81,13 +70,13 @@ export function FecharDisciplina({
   }
 
   return (
-  <div className="min-h-screen bg-[#f1f5f9] text-slate-800">
-    <Header
-      titulo="Fechar Disciplina"
-      subtitulo="Consolidar notas finais e encerrar o lançamento da turma"
-    />
+    <div className="min-h-screen bg-[#f1f5f9] text-slate-800">
+      <Header
+        titulo="Fechar Disciplina"
+        subtitulo="Consolidar notas finais e encerrar o lançamento da turma"
+      />
 
-      <main className="p-6">
+      <main className="px-6 pb-6 pt-1">
         {/* Bar de Seleção e Botão Escuro */}
         <div className="px-0 py-3 flex items-end justify-between">
           <div>
@@ -143,21 +132,20 @@ export function FecharDisciplina({
 
         {/* Tabela de Notas e Situação */}
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-
           <div className="px-5 py-4 border-b border-slate-100">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Consolidação Final - {nomeTurma} ({codigoTurma})
-              </h2>
-            </div>
+            <h2 className="text-sm font-semibold text-slate-900">
+              Consolidação Final - {nomeTurma} ({codigoTurma})
+            </h2>
+          </div>
 
           <div className="grid grid-cols-12 px-6 py-3.5 bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              <div className="col-span-5">ALUNO</div>
-              <div className="col-span-1 text-center">AV1</div>
-              <div className="col-span-1 text-center">AV2</div>
-              <div className="col-span-2 text-center">MÉDIA FINAL</div>
-              <div className="col-span-1 text-center">FALTAS</div>
-              <div className="col-span-2 text-right pr-2">SITUAÇÃO</div>
-            </div>
+            <div className="col-span-5">ALUNO</div>
+            <div className="col-span-1 text-center">AV1</div>
+            <div className="col-span-1 text-center">AV2</div>
+            <div className="col-span-2 text-center">MÉDIA FINAL</div>
+            <div className="col-span-1 text-center">FALTAS</div>
+            <div className="col-span-2 text-right pr-2">SITUAÇÃO</div>
+          </div>
 
           <div className="divide-y divide-slate-100">
             {alunos.map((aluno) => (
@@ -204,9 +192,7 @@ export function FecharDisciplina({
           onConfirmarFechamento={handleConfirmarEncerramento}
           isLoading={isEncerrando}
         />
-    </main>
-
-  </div>
-    
+      </main>
+    </div>
   )
 }

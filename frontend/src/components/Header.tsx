@@ -9,7 +9,7 @@ export function Header({ titulo, subtitulo, busca, onBuscaChange }: HeaderProps)
   return (
     <header className="flex items-center justify-between bg-white border-b border-slate-200 px-6 py-4">
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-slate-900 tracking-tight">{titulo}</h1>
+        <h1 className="font-heading text-2xl font-[DM_Sans] font-semibold text-slate-900 tracking-tight">{titulo}</h1>
         <p className="text-sm text-slate-500 mt-0.5">{subtitulo}</p>
       </div>
 
