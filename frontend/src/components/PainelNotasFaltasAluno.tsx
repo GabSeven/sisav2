@@ -121,7 +121,10 @@ export function PainelNotasFaltasAluno({
     if (media >= 5.0) return 'text-amber-600'
     return 'text-red-600'
   }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
   const getFaltaNumeroColor = (faltas: number, limite: number) => {
     const ratio = limite > 0 ? faltas / limite : 0
     if (ratio >= 0.75) return 'text-red-600'
