@@ -23,6 +23,7 @@ build/
 !.env.example
 *.pem
 *.key
+.figma-token
 
 # --- Banco de dados local ---
 *.sqlite3

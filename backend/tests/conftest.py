@@ -5,6 +5,7 @@ from sqlalchemy.pool import StaticPool
 
 from sisav.academico.models import Disciplina, Matricula, Turma
 from sisav.auth.dependencies import get_current_user_id  # <-- Nova importação
+from sisav.auth.security import gerar_hash
 from sisav.core.db import Base, get_db
 from sisav.main import app
 from sisav.usuarios.models import Perfil, Usuario
@@ -20,6 +21,25 @@ async def session_factory():
         await conn.run_sync(Base.metadata.create_all)
     yield async_sessionmaker(engine, expire_on_commit=False)
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def usuario_teste(session_factory):
+    senha = "senha-teste"
+
+    async with session_factory() as db:
+        db.add(
+            Usuario(
+                id=100,
+                nome="Professor Teste",
+                nome_de_usuario="professor_teste",
+                senha_hash=gerar_hash(senha),
+                perfil=Perfil.PROFESSOR,
+            )
+        )
+        await db.commit()
+
+    return {"id": 100, "nome_de_usuario": "professor_teste", "senha": senha}
 
 
 @pytest_asyncio.fixture
