@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { salvarChamada } from '@/services/frequenciaService'
+import { Header } from  './Header'
 
 export interface Aluno {
   id: number
@@ -87,30 +88,12 @@ export function TabelaChamada({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/60 p-6 font-['DM_Sans'] text-slate-800">
-      {/* Cabeçalho Superior */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Lançar Faltas</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Registro de frequência por data de aula</p>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="w-56 bg-slate-100 text-sm px-4 py-2 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
-          <div className="relative cursor-pointer p-2 rounded-full hover:bg-slate-100">
-            <span className="w-2 h-2 bg-red-500 rounded-full absolute top-1 right-1 border border-white"></span>
-            <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#F1F5F9] text-slate-800">
+      <Header
+      titulo="Lançar Faltas"
+      subtitulo="Registro de frequência por data de aula"
+      />
+      <main className="p-6">
 
       {/* Card de Filtros e Ação */}
       <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm mb-4">
@@ -212,6 +195,7 @@ export function TabelaChamada({
           })}
         </div>
       </div>
+    </main>
     </div>
   )
 }

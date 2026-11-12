@@ -1,10 +1,9 @@
-// import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { TabelaChamada } from './components/TabelaChamada'
+import { FecharDisciplina } from './components/FecharDisciplina'
+import type { Aluno } from './components/TabelaChamada'
 
-// type ApiStatus = 'indo' | 'ok' | 'erro'
-
-// Dados tabela
-const alunos: Aluno[] = [
+const alunosTeste: Aluno[] = [
   { id: 1, nome: 'Daniella Midori Hamada Yamasaki', ra: '139567', faltasAcumuladas: 3 },
   { id: 2, nome: 'João Vitor Bidoia Angelo', ra: '139617', faltasAcumuladas: 6 },
   { id: 3, nome: 'Gabriel Rodrigues Gomes', ra: '139159', faltasAcumuladas: 4 },
@@ -15,27 +14,47 @@ const alunos: Aluno[] = [
 ]
 
 export default function App() {
-  /* const [status, setStatus] = useState<ApiStatus>('indo')
+  const [telaAtiva, setTelaAtiva] = useState<'chamada' | 'fechar'>('fechar')
 
-  useEffect(() => {
-    fetch('/health')
-      .then((r) => setStatus(r.ok ? 'ok' : 'erro'))
-      .catch(() => setStatus('erro'))
-  }, [])
-*/ 
   return (
-/*     <div className="flex min-h-screen items-center justify-center bg-neutral-50 text-neutral-900">
-      <main className="text-center">
-        <h1 className="text-2xl font-semibold">SISAV 2</h1>
-        <p className="mt-2 text-sm text-neutral-500">
-          API: <span className={status === 'ok' ? 'text-green-600' : 'text-red-600'}>{status}</span>
-        </p>
-      </main>
-    </div> */
+    <div>
+      {/* Barra superior para alternar entre os componentes durante os testes */}
+      <div className="bg-slate-900 text-white px-6 py-2.5 flex items-center justify-between text-xs font-sans">
+        <span className="font-semibold text-slate-400">Preview de Componentes</span>
+        
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setTelaAtiva('chamada')}
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+              telaAtiva === 'chamada'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Lançar Faltas
+          </button>
 
-    // Visualização da Tabela
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <TabelaChamada turmaId={1} alunos={alunos} />
+          <button
+            type="button"
+            onClick={() => setTelaAtiva('fechar')}
+            className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+              telaAtiva === 'fechar'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Fechar Disciplina
+          </button>
+        </div>
+      </div>
+
+      {/* Renderização do componente selecionado */}
+      {telaAtiva === 'chamada' ? (
+        <TabelaChamada alunos={alunosTeste} />
+      ) : (
+        <FecharDisciplina />
+      )}
     </div>
   )
 }
