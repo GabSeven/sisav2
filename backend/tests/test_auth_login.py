@@ -2,10 +2,12 @@ import pytest
 
 from sisav.auth import tokens
 from sisav.auth.dependencies import get_current_user_id
+from sisav.main import app
 
 pytestmark = pytest.mark.asyncio
 
 LOGIN_URL = "/api/v1/auth/login"
+TOKEN_URL = "/api/v1/auth/token"
 
 
 async def test_login_valido_retorna_token_e_perfil(client, usuario_teste):
@@ -90,3 +92,38 @@ async def test_login_senha_acima_de_72_bytes_retorna_422(client, usuario_teste):
     )
 
     assert resposta.status_code == 422
+
+
+async def test_token_oauth2_valido_retorna_token(client, usuario_teste):
+    resposta = await client.post(
+        TOKEN_URL,
+        data={
+            "username": usuario_teste["nome_de_usuario"],
+            "password": usuario_teste["senha"],
+        },
+    )
+
+    assert resposta.status_code == 200
+    corpo = resposta.json()
+    assert corpo["token_type"] == "bearer"
+    payload = tokens.decodificar_token(corpo["access_token"], tokens.TOKEN_TIPO_ACESSO)
+    assert payload["sub"] == str(usuario_teste["id"])
+
+
+async def test_token_oauth2_com_senha_incorreta_retorna_401(client, usuario_teste):
+    resposta = await client.post(
+        TOKEN_URL,
+        data={
+            "username": usuario_teste["nome_de_usuario"],
+            "password": "senha-errada",
+        },
+    )
+
+    assert resposta.status_code == 401
+
+
+async def test_swagger_token_url_aponta_para_endpoint_oauth2():
+    esquema = app.openapi()["components"]["securitySchemes"]["OAuth2PasswordBearer"]
+    token_url = esquema["flows"]["password"]["tokenUrl"]
+
+    assert token_url == TOKEN_URL

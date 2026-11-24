@@ -4,9 +4,11 @@ import bcrypt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from sisav.academico.models import Disciplina, Matricula, Turma
+from sisav.academico.models import Curso, Disciplina, Matricula, Turma
 from sisav.core.config import get_settings
-from sisav.usuarios.models import Perfil, Usuario
+from sisav.usuarios.models import Aluno, Perfil, Usuario
+
+CURSO_SEED = "Engenharia de Software"
 
 
 def hash_senha(senha: str) -> str:
@@ -18,11 +20,23 @@ async def main() -> None:
     Session = async_sessionmaker(engine, expire_on_commit=False)
 
     async with Session() as db:
-        existe = await db.scalar(
+        aluno_existente = await db.scalar(
             select(Usuario).where(Usuario.nome_de_usuario == "aluno.teste")
         )
-        if existe:
-            print("Seed já aplicado, aluno id =", existe.id)
+        if aluno_existente is not None:
+            if await db.get(Aluno, aluno_existente.id) is None:
+                curso_existente = await db.scalar(
+                    select(Curso).where(Curso.nome == CURSO_SEED)
+                )
+                if curso_existente is None:
+                    curso_existente = Curso(nome=CURSO_SEED)
+                    db.add(curso_existente)
+                    await db.flush()
+                db.add(Aluno(id=aluno_existente.id, curso_id=curso_existente.id))
+                await db.commit()
+                print("Aluno existente vinculado ao curso.")
+            else:
+                print("Seed já aplicado, aluno id =", aluno_existente.id)
             return
 
         aluno = Usuario(
@@ -37,10 +51,12 @@ async def main() -> None:
             senha_hash=hash_senha("senha123"),
             perfil=Perfil.PROFESSOR,
         )
+        curso = Curso(nome=CURSO_SEED)
         calculo = Disciplina(nome="Cálculo I", carga_horaria=90)
         construcao = Disciplina(nome="Construção de Software", carga_horaria=60)
-        db.add_all([aluno, professor, calculo, construcao])
-        await db.flush()  # gera os ids
+        db.add_all([aluno, professor, curso, calculo, construcao])
+        await db.flush()
+        db.add(Aluno(id=aluno.id, curso_id=curso.id))
 
         turmas = [
             Turma(codigo="A", semestre="2026.1", sala="B-101", dia_semana="segunda",

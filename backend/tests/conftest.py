@@ -3,12 +3,12 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
-from sisav.academico.models import Disciplina, Matricula, Turma
-from sisav.auth.dependencies import get_current_user_id  # <-- Nova importação
+from sisav.academico.models import Curso, Disciplina, Matricula, Turma
+from sisav.auth.dependencies import get_current_user_id
 from sisav.auth.security import gerar_hash
 from sisav.core.db import Base, get_db
 from sisav.main import app
-from sisav.usuarios.models import Perfil, Usuario
+from sisav.usuarios.models import Aluno, Perfil, Usuario
 
 
 @pytest_asyncio.fixture
@@ -60,10 +60,12 @@ async def cenario(session_factory):
     async with session_factory() as db:
         aluno = Usuario(id=1, nome="A", nome_de_usuario="a", senha_hash="x", perfil=Perfil.ALUNO)
         outro = Usuario(id=2, nome="B", nome_de_usuario="b", senha_hash="x", perfil=Perfil.ALUNO)
+        curso = Curso(id=1, nome="Engenharia de Software")
         calc = Disciplina(id=1, nome="Cálculo I", carga_horaria=90)
         cs = Disciplina(id=2, nome="Construção de Software", carga_horaria=60)
-        db.add_all([aluno, outro, calc, cs])
+        db.add_all([aluno, outro, curso, calc, cs])
         await db.flush()
+        db.add(Aluno(id=1, curso_id=curso.id))
         t1 = Turma(id=1, codigo="A", semestre="2026.1", sala="B-101", dia_semana="quarta",
                    horario_inicio="10:00", horario_fim="11:40", disciplina_id=1)
         t2 = Turma(id=2, codigo="B", semestre="2026.1", sala="I-12", dia_semana="segunda",

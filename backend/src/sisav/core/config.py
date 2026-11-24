@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +22,8 @@ class Settings(BaseSettings):
 
     seed_password: str = "senha-seed"
     seed_usuario: str = "professor_teste"
+
+    upload_dir: Path = Path(__file__).resolve().parents[3] / "uploads"
 
 _settings: Settings | None = None
 
