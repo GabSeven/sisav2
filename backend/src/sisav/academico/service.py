@@ -4,8 +4,8 @@ from sisav.academico.models import Curso
 
 
 async def nome_do_curso(
+    curso_id: int | None,
     db: AsyncSession,
-    curso_id: int | None
 ) -> str | None:
     if curso_id is None:
         return None
