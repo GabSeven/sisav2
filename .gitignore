@@ -30,6 +30,10 @@ build/
 *.db
 pgdata/
 
+# --- Uploads locais ---
+backend/uploads/*
+!backend/uploads/.gitkeep
+
 # --- IDE / SO ---
 .vscode/
 .idea/
