@@ -8,9 +8,9 @@ import { Painel } from '@/modules/painel/Painel'
 import { Layout } from '@/components/Layout'
 
 function RequireAuth({ children }: { children: ReactNode }) {
-  // if (lerSessao() === null) {
-  //   return <Navigate to="/login" replace />
-  // }
+  if (lerSessao() === null) {
+    return <Navigate to="/login" replace />
+  }
 
   return <>{children}</>
 }
