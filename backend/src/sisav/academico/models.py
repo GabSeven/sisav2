@@ -84,3 +84,9 @@ class RegistroFrequencia(Base):
     faltas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     matricula: Mapped["Matricula"] = relationship()
+
+class Curso(Base):
+    __tablename__ = "cursos"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
