@@ -26,6 +26,9 @@ class Settings(BaseSettings):
 
     upload_dir: Path = Path(__file__).resolve().parents[3] / "uploads"
 
+    password_reset_url: str = "http://localhost:5173/redefinir-senha#token={token}"
+    mostrar_link_recuperacao: bool = False
+
 _settings: Settings | None = None
 
 
