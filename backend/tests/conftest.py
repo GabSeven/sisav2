@@ -5,6 +5,7 @@ from sqlalchemy.pool import StaticPool
 
 from sisav.academico.models import Curso, Disciplina, Matricula, Turma
 from sisav.auth.dependencies import get_current_user_id
+from sisav.auth.models import TokenRecuperacao  # noqa: F401
 from sisav.auth.security import gerar_hash
 from sisav.core.db import Base, get_db
 from sisav.main import app
@@ -58,8 +59,12 @@ async def client(session_factory):
 @pytest_asyncio.fixture
 async def cenario(session_factory):
     async with session_factory() as db:
-        aluno = Usuario(id=1, nome="A", nome_de_usuario="a", senha_hash="x", perfil=Perfil.ALUNO)
-        outro = Usuario(id=2, nome="B", nome_de_usuario="b", senha_hash="x", perfil=Perfil.ALUNO)
+        aluno = Usuario(
+            id=1, nome="Fulano", nome_de_usuario="ra1234", senha_hash="x", perfil=Perfil.ALUNO
+        )
+        outro = Usuario(
+            id=2, nome="Ciclano", nome_de_usuario="ciclano", senha_hash="x", perfil=Perfil.ALUNO
+        )
         curso = Curso(id=1, nome="Engenharia de Software")
         calc = Disciplina(id=1, nome="Cálculo I", carga_horaria=90)
         cs = Disciplina(id=2, nome="Construção de Software", carga_horaria=60)

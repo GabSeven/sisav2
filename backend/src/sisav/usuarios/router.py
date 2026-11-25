@@ -2,6 +2,8 @@ from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sisav.academico.service import nome_do_curso
@@ -10,8 +12,17 @@ from sisav.core.config import get_settings
 from sisav.core.db import get_db
 from sisav.usuarios.models import Aluno, Usuario
 from sisav.usuarios.schemas import ContatoUpdateRequest, PerfilResponse
+from sisav.usuarios.service import email_institucional
 
 router = APIRouter(prefix="/usuarios", tags=["Usuário"])
+
+settings = get_settings()
+TIPOS_IMAGEM = {"image/jpeg": ".jpg", "image/png": ".png"}
+ASSINATURAS_IMAGEM = {
+    b"\xff\xd8\xff": "image/jpeg",
+    b"\x89PNG\r\n\x1a\n": "image/png",
+}
+MAX_FOTO_BYTES = 2 * 1024 * 1024
 
 async def montar_perfil(usuario: Usuario, db: AsyncSession) -> PerfilResponse:
     aluno = await db.get(Aluno, usuario.id)
@@ -20,11 +31,42 @@ async def montar_perfil(usuario: Usuario, db: AsyncSession) -> PerfilResponse:
         nome=usuario.nome,
         matricula=usuario.nome_de_usuario,
         curso=curso,
-        email_institucional=f"{usuario.nome_de_usuario}@uem.br",
+        email_institucional=email_institucional(usuario.nome_de_usuario),
         foto_url=f"/uploads/{usuario.foto_perfil}" if usuario.foto_perfil else None,
         telefone=usuario.telefone,
         email_alternativo=usuario.email_alternativo,
     )
+
+
+async def validar_email_alternativo(dados: ContatoUpdateRequest, db: AsyncSession) -> None:
+    if "email_alternativo" not in dados.model_fields_set:
+        return
+
+    alt = dados.email_alternativo
+    if alt is None:
+        return
+    
+    sufixo = f"@{settings.dominio_institucional}"
+    if not alt.endswith(sufixo):
+        return
+        
+    conflito = await db.scalar(
+        select(Usuario).where(Usuario.nome_de_usuario == alt.removesuffix(sufixo))
+    )
+    if conflito is not None:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "Esse e-mail já é o institucional de uma conta.",
+        )
+
+
+def aplicar_contato(usuario: Usuario, dados: ContatoUpdateRequest) -> None:
+    campos = dados.model_fields_set
+    if "telefone" in campos:
+        usuario.telefone = dados.telefone
+    if "email_alternativo" in campos:
+        usuario.email_alternativo = dados.email_alternativo
+
 
 @router.get("/me/perfil", response_model=PerfilResponse)
 async def obter_perfil(
@@ -37,33 +79,30 @@ async def obter_perfil(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário não encontrado.")
     return await montar_perfil(usuario, db)
 
+
 @router.patch("/me/contato", response_model=PerfilResponse)
 async def atualiza_contato(
     dados: ContatoUpdateRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
     usuario_id: Annotated[int, Depends(get_current_user_id)],
 ) -> PerfilResponse:
+
     usuario = await db.get(Usuario, usuario_id)
     if usuario is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário não encontrado.")
 
-    campos = dados.model_fields_set
-    if "telefone" in campos:
-        usuario.telefone = dados.telefone
-    if "email_alternativo" in campos:
-        usuario.email_alternativo = dados.email_alternativo
-
-    await db.commit()
+    await validar_email_alternativo(dados, db)
+    aplicar_contato(usuario, dados)
+    
+    try:
+        await db.commit()
+    except IntegrityError as erro:
+        await db.rollback()
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "E-mail alternativo já cadastrado."
+        ) from erro
     await db.refresh(usuario)
     return await montar_perfil(usuario, db)
-
-settings = get_settings()
-TIPOS_IMAGEM = {"image/jpeg": ".jpg", "image/png": ".png"}
-ASSINATURAS_IMAGEM = {
-    b"\xff\xd8\xff": "image/jpeg",
-    b"\x89PNG\r\n\x1a\n": "image/png",
-}
-MAX_FOTO_BYTES = 2 * 1024 * 1024
 
 
 @router.post("/me/foto", response_model=PerfilResponse)
