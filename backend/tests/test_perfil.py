@@ -1,6 +1,7 @@
 import pytest
 
 from sisav.core.config import get_settings
+from sisav.usuarios.models import Perfil, Usuario
 
 pytestmark = pytest.mark.asyncio
 
@@ -16,10 +17,10 @@ async def test_perfil_do_aluno_traz_dados_e_curso(client, cenario):
 
     assert resposta.status_code == 200
     assert resposta.json() == {
-        "nome": "A",
-        "matricula": "a",
+        "nome": "Fulano",
+        "matricula": "ra1234",
         "curso": "Engenharia de Software",
-        "email_institucional": "a@uem.br",
+        "email_institucional": "ra1234@uem.br",
         "foto_url": None,
         "telefone": None,
         "email_alternativo": None,
@@ -68,6 +69,39 @@ async def test_patch_contato_com_email_invalido_retorna_422(client, cenario):
     )
 
     assert resposta.status_code == 422
+
+
+async def test_patch_contato_com_email_institucional_retorna_422(client, cenario):
+    resposta = await client.patch(
+        CONTATO_URL,
+        json={"email_alternativo": "ra1234@uem.br", "confirmado": True},
+    )
+
+    assert resposta.status_code == 422
+
+
+async def test_patch_contato_com_alternativo_duplicado_retorna_409(
+    client, cenario, session_factory
+):
+    async with session_factory() as db:
+        db.add(
+            Usuario(
+                id=9,
+                nome="Outro",
+                nome_de_usuario="outro.usuario",
+                senha_hash="x",
+                perfil=Perfil.ALUNO,
+                email_alternativo="duplicado@exemplo.com",
+            )
+        )
+        await db.commit()
+
+    resposta = await client.patch(
+        CONTATO_URL,
+        json={"email_alternativo": "duplicado@exemplo.com", "confirmado": True},
+    )
+
+    assert resposta.status_code == 409
 
 
 async def test_upload_foto_valida_e_servea_o_arquivo(client, cenario):
