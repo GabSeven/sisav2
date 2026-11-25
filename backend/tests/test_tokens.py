@@ -60,3 +60,26 @@ def test_usuario_id_extraido_do_token():
     token = tokens.gerar_token_acesso(42, Perfil.PROFESSOR)
 
     assert tokens.usuario_id_do_token(token) == 42
+
+
+def test_token_recuperacao_tem_jti_e_valida_no_tipo_correto():
+    token = tokens.gerar_token_recuperacao(7)
+    payload = tokens.decodificar_token(token, tokens.TOKEN_TIPO_RECUPERACAO)
+
+    assert payload["sub"] == "7"
+    assert payload["jti"]
+    assert 29 * 60 <= payload["exp"] - payload["iat"] <= 30 * 60
+
+
+def test_token_recuperacao_nao_carrega_perfil():
+    token = tokens.gerar_token_recuperacao(3)
+    payload = tokens.decodificar_token(token, tokens.TOKEN_TIPO_RECUPERACAO)
+
+    assert "perfil" not in payload
+
+
+def test_token_recuperacao_nao_e_aceito_como_access():
+    token = tokens.gerar_token_recuperacao(1)
+
+    with pytest.raises(tokens.TokenInvalido):
+        tokens.decodificar_token(token, tokens.TOKEN_TIPO_ACESSO)
