@@ -5,6 +5,7 @@ from sqlalchemy.pool import StaticPool
 
 from sisav.academico.models import Curso, Disciplina, Matricula, Turma
 from sisav.auth.dependencies import get_current_user_id
+from sisav.auth.models import TokenRecuperacao  # noqa: F401
 from sisav.auth.security import gerar_hash
 from sisav.core.db import Base, get_db
 from sisav.main import app
