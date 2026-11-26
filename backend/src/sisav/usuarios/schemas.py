@@ -2,7 +2,7 @@ import re
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
-
+from sisav.usuarios.models import Perfil
 
 class PerfilResponse(BaseModel):
     nome: str
@@ -38,3 +38,11 @@ class ContatoUpdateRequest(BaseModel):
         if valor is not None and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", valor):
             raise ValueError("E-mail alternativo inválido.")
         return valor
+
+class UsuarioBuscaItem(BaseModel):
+    id: int
+    nome: str
+    nome_de_usuario: str
+    perfil: Perfil
+    email_institucional: str
+    foto_url: str | None

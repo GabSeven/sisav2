@@ -1,16 +1,16 @@
 from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sisav.academico.service import nome_do_curso
 from sisav.auth.dependencies import get_current_user_id
 from sisav.core.config import get_settings
 from sisav.core.db import get_db
-from sisav.usuarios.models import Aluno, Usuario
-from sisav.usuarios.schemas import ContatoUpdateRequest, PerfilResponse
-
+from sisav.usuarios.models import Aluno, Perfil, Usuario
+from sisav.usuarios.schemas import ContatoUpdateRequest, PerfilResponse, UsuarioBuscaItem
 router = APIRouter(prefix="/usuarios", tags=["Usuário"])
 
 async def montar_perfil(usuario: Usuario, db: AsyncSession) -> PerfilResponse:
@@ -113,3 +113,42 @@ async def atualiza_foto_perfil(
     await db.commit()
     await db.refresh(usuario)
     return await montar_perfil(usuario, db)
+
+@router.get("/busca", response_model=list[UsuarioBuscaItem])
+async def buscar_usuarios(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    usuario_id: Annotated[int, Depends(get_current_user_id)],
+    q: Annotated[str, Query(min_length=1, max_length=100)],
+    perfil: Annotated[Perfil | None, Query()] = None,
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+) -> list[UsuarioBuscaItem]:
+    termo = q.strip()
+    if not termo:
+        return []
+
+    padrao = f"%{termo}%"
+    stmt = select(Usuario).where(
+        Usuario.id != usuario_id,
+        or_(
+            Usuario.nome.ilike(padrao),
+            Usuario.nome_de_usuario.ilike(padrao),
+        ),
+    )
+
+    if perfil is not None:
+        stmt = stmt.where(Usuario.perfil == perfil)
+
+    stmt = stmt.order_by(Usuario.nome.asc()).limit(limit)
+    usuarios = (await db.execute(stmt)).scalars().all()
+
+    return [
+        UsuarioBuscaItem(
+            id=u.id,
+            nome=u.nome,
+            nome_de_usuario=u.nome_de_usuario,
+            perfil=u.perfil,
+            email_institucional=f"{u.nome_de_usuario}@uem.br",
+            foto_url=f"/uploads/{u.foto_perfil}" if u.foto_perfil else None,
+        )
+        for u in usuarios
+    ]
