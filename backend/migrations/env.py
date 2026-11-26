@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from sisav.academico.models import Disciplina, Matricula, Turma  # noqa: F401
 from sisav.core.config import get_settings
 from sisav.core.db import Base
+from sisav.notificacoes.models import Notificacao  # noqa: F401
 from sisav.usuarios.models import Usuario  # noqa: F401
 
 config = context.config
