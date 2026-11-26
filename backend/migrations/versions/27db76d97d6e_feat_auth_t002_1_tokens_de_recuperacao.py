@@ -5,16 +5,16 @@ Revises: 3dd65016f16b
 Create Date: 2026-11-25 14:47:00.852095
 
 """
-from typing import Sequence, Union
+from typing import Sequence
 
 from alembic import op
 import sqlalchemy as sa
 
 
 revision: str = '27db76d97d6e'
-down_revision: Union[str, None] = '3dd65016f16b'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = '3dd65016f16b'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -24,10 +24,20 @@ def upgrade() -> None:
     sa.Column('usuario_id', sa.Integer(), nullable=False),
     sa.Column('exp', sa.DateTime(timezone=True), nullable=False),
     sa.Column('usado_em', sa.DateTime(timezone=True), nullable=True),
-    sa.ForeignKeyConstraint(['usuario_id'], ['usuarios.id'], name=op.f('fk_tokens_recuperacao_usuario_id_usuarios'), ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(
+        ['usuario_id'],
+        ['usuarios.id'],
+        name=op.f('fk_tokens_recuperacao_usuario_id_usuarios'),
+        ondelete='CASCADE'
+    ),
     sa.PrimaryKeyConstraint('jti', name=op.f('pk_tokens_recuperacao'))
     )
-    op.create_index(op.f('ix_tokens_recuperacao_usuario_id'), 'tokens_recuperacao', ['usuario_id'], unique=False)
+    op.create_index(
+        op.f('ix_tokens_recuperacao_usuario_id'),
+        'tokens_recuperacao',
+        ['usuario_id'],
+        unique=False
+    )
     # ### end Alembic commands ###
 
 
