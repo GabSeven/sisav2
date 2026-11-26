@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from sisav.academico.frequencia_router import router as frequencia_router
@@ -7,7 +8,6 @@ from sisav.auth.router import router as auth_router
 from sisav.core.config import get_settings
 from sisav.notificacoes.router import router as notificacoes_router
 from sisav.usuarios.router import router as usuarios_router
-from fastapi.middleware.cors import CORSMiddleware
 
 settings = get_settings()
 
