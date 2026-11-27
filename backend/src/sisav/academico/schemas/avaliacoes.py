@@ -142,3 +142,34 @@ class ConsolidacaoTurmaResponse(BaseModel):
     @field_serializer("fechada_em")
     def serializar_fechada_em(self, valor: datetime | None) -> str | None:
         return _serializar_data_hora(valor)
+
+
+class AlunoTurmaResponse(BaseModel):
+    matricula_id: int
+    aluno_id: int
+    nome: str
+    nome_de_usuario: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TurmaAlunosResponse(BaseModel):
+    turma_id: int
+    alunos: list[AlunoTurmaResponse]
+
+
+class NotaTurmaResponse(BaseModel):
+    avaliacao_id: int
+    matricula_id: int
+    valor: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("valor")
+    def serializar_valor(self, valor: int) -> float:
+        return de_centesimos(valor)
+
+
+class NotasTurmaResponse(BaseModel):
+    turma_id: int
+    notas: list[NotaTurmaResponse]

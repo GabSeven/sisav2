@@ -19,6 +19,7 @@ from sisav.academico.models import (
     Turma,
 )
 from sisav.academico.schemas.avaliacoes import (
+    AlunoTurmaResponse,
     AvaliacaoResponse,
     BoletimResponse,
     BoletimTurmaResponse,
@@ -28,6 +29,9 @@ from sisav.academico.schemas.avaliacoes import (
     NotaAvaliacaoResponse,
     NotaResponse,
     NotasLancadasResponse,
+    NotasTurmaResponse,
+    NotaTurmaResponse,
+    TurmaAlunosResponse,
 )
 from sisav.academico.services.agregacao import (
     criterios_da_matricula,
@@ -40,7 +44,7 @@ from sisav.academico.services.calculo import (
     para_centesimos,
 )
 from sisav.academico.services.frequencia import excedeu_limite, limite_de_faltas
-from sisav.academico.services.permissoes import turma_do_professor
+from sisav.academico.services.permissoes import turma_do_professor, turma_para_leitura
 from sisav.auth.dependencies import get_current_user_id
 from sisav.core.db import get_db
 from sisav.usuarios.models import Perfil, Usuario
@@ -415,3 +419,70 @@ async def obter_boletim(
         )
 
     return BoletimResponse(ano=ano, semestre=semestre, turmas=turmas)
+
+
+@router.get("/turmas/{turma_id}/alunos", response_model=TurmaAlunosResponse)
+async def listar_alunos_da_turma(
+    turma_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    usuario_id: Annotated[int, Depends(get_current_user_id)],
+) -> TurmaAlunosResponse:
+    turma = await turma_para_leitura(turma_id, usuario_id, db)
+    linhas = (
+        await db.execute(
+            select(Matricula, Usuario)
+            .join(Usuario, Matricula.aluno_id == Usuario.id)
+            .where(Matricula.turma_id == turma.id)
+            .order_by(Usuario.nome, Matricula.id)
+        )
+    ).all()
+    return TurmaAlunosResponse(
+        turma_id=turma.id,
+        alunos=[
+            AlunoTurmaResponse(
+                matricula_id=matricula.id,
+                aluno_id=usuario.id,
+                nome=usuario.nome,
+                nome_de_usuario=usuario.nome_de_usuario,
+            )
+            for matricula, usuario in linhas
+        ],
+    )
+
+
+@router.get("/turmas/{turma_id}/avaliacoes", response_model=list[AvaliacaoResponse])
+async def listar_avaliacoes(
+    turma_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    usuario_id: Annotated[int, Depends(get_current_user_id)],
+) -> list[AvaliacaoResponse]:
+    await turma_para_leitura(turma_id, usuario_id, db)
+    avaliacoes = (
+        await db.scalars(
+            select(Avaliacao)
+            .where(Avaliacao.turma_id == turma_id)
+            .order_by(Avaliacao.id)
+        )
+    ).all()
+    return [AvaliacaoResponse.model_validate(item) for item in avaliacoes]
+
+
+@router.get("/turmas/{turma_id}/notas", response_model=NotasTurmaResponse)
+async def listar_notas(
+    turma_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    usuario_id: Annotated[int, Depends(get_current_user_id)],
+) -> NotasTurmaResponse:
+    turma = await turma_para_leitura(turma_id, usuario_id, db)
+    notas = (
+        await db.execute(
+            select(Nota)
+            .join(Avaliacao, Nota.avaliacao_id == Avaliacao.id)
+            .where(Avaliacao.turma_id == turma.id)
+            .order_by(Nota.avaliacao_id, Nota.matricula_id)
+        )
+    ).scalars().all()
+    return NotasTurmaResponse(
+        turma_id=turma.id,
+        notas=[NotaTurmaResponse.model_validate(nota) for nota in notas],
+    )

@@ -33,6 +33,7 @@ class AlunoFrequenciaResponse(BaseModel):
     matricula_id: int
     nome_aluno: str
     total_faltas: int
+    faltas_no_bloco: int
     limite_faltas: int
     percentual_faltas: float
     excedeu_limite: bool

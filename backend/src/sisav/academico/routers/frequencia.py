@@ -1,6 +1,8 @@
+from collections.abc import Sequence
+from datetime import date, time
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,11 +17,35 @@ from sisav.academico.services.frequencia import (
     limite_de_faltas,
     percentual_de_faltas,
 )
-from sisav.academico.services.permissoes import get_professor_atual
+from sisav.academico.services.permissoes import get_professor_atual, turma_para_leitura
+from sisav.auth.dependencies import get_current_user_id
 from sisav.core.db import get_db
 from sisav.usuarios.models import Usuario
 
 router = APIRouter(prefix="/avaliacao-frequencia", tags=["Avaliação e Frequência"])
+
+
+def _montar_alunos(
+    matriculas: Sequence[tuple[int, str]],
+    totais: dict[int, int],
+    no_bloco: dict[int, int],
+    carga_horaria: int,
+) -> list[AlunoFrequenciaResponse]:
+    alunos: list[AlunoFrequenciaResponse] = []
+    for matricula_id, nome in matriculas:
+        total = totais.get(matricula_id, 0)
+        alunos.append(
+            AlunoFrequenciaResponse(
+                matricula_id=matricula_id,
+                nome_aluno=nome,
+                total_faltas=total,
+                faltas_no_bloco=no_bloco.get(matricula_id, 0),
+                limite_faltas=limite_de_faltas(carga_horaria),
+                percentual_faltas=percentual_de_faltas(total, carga_horaria),
+                excedeu_limite=excedeu_limite(total, carga_horaria),
+            )
+        )
+    return alunos
 
 
 @router.put("/turmas/{turma_id}/faltas", response_model=FaltasTurmaResponse)
@@ -112,22 +138,74 @@ async def registrar_faltas(
         ).all()
     }
 
-    limite = limite_de_faltas(carga_horaria)
-    alunos = [
-        AlunoFrequenciaResponse(
-            matricula_id=matricula_id,
-            nome_aluno=nome,
-            total_faltas=totais.get(matricula_id, 0),
-            limite_faltas=limite,
-            percentual_faltas=percentual_de_faltas(totais.get(matricula_id, 0), carga_horaria),
-            excedeu_limite=excedeu_limite(totais.get(matricula_id, 0), carga_horaria),
-        )
-        for matricula_id, nome in matriculas
-    ]
+    no_bloco = {item.matricula_id: item.faltas for item in dados.registros}
     return FaltasTurmaResponse(
         turma_id=turma_id,
         data=dados.data,
         horario_inicio=dados.horario_inicio,
         horario_fim=dados.horario_fim,
-        alunos=alunos,
+        alunos=_montar_alunos(matriculas, totais, no_bloco, carga_horaria),
+    )
+
+
+@router.get("/turmas/{turma_id}/faltas", response_model=FaltasTurmaResponse)
+async def consultar_faltas(
+    turma_id: int,
+    data: Annotated[date, Query()],
+    horario_inicio: Annotated[time, Query()],
+    horario_fim: Annotated[time, Query()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    usuario_id: Annotated[int, Depends(get_current_user_id)],
+) -> FaltasTurmaResponse:
+    turma = await turma_para_leitura(turma_id, usuario_id, db)
+    if turma.horario_inicio != horario_inicio or turma.horario_fim != horario_fim:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "O bloco informado não corresponde ao horário da turma.",
+        )
+
+    matriculas = (
+        await db.execute(
+            select(Matricula.id, Usuario.nome)
+            .join(Usuario, Matricula.aluno_id == Usuario.id)
+            .where(Matricula.turma_id == turma.id)
+            .order_by(Usuario.nome)
+        )
+    ).all()
+    ids_da_turma = [matricula_id for matricula_id, _ in matriculas]
+    if not ids_da_turma:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Turma sem matrículas.")
+
+    totais = {
+        matricula_id: int(total)
+        for matricula_id, total in (
+            await db.execute(
+                select(RegistroFrequencia.matricula_id, func.sum(RegistroFrequencia.faltas))
+                .where(RegistroFrequencia.matricula_id.in_(ids_da_turma))
+                .group_by(RegistroFrequencia.matricula_id)
+            )
+        ).all()
+    }
+    no_bloco = {
+        matricula_id: faltas
+        for matricula_id, faltas in (
+            await db.execute(
+                select(RegistroFrequencia.matricula_id, RegistroFrequencia.faltas).where(
+                    RegistroFrequencia.matricula_id.in_(ids_da_turma),
+                    RegistroFrequencia.data == data,
+                    RegistroFrequencia.horario_inicio == horario_inicio,
+                    RegistroFrequencia.horario_fim == horario_fim,
+                )
+            )
+        ).all()
+    }
+    carga_horaria = await db.scalar(
+        select(Disciplina.carga_horaria).where(Disciplina.id == turma.disciplina_id)
+    )
+    return FaltasTurmaResponse(
+        turma_id=turma.id,
+        data=data,
+        horario_inicio=horario_inicio,
+        horario_fim=horario_fim,
+        alunos=_montar_alunos(matriculas, totais, no_bloco, carga_horaria),
     )

@@ -5,7 +5,14 @@ import bcrypt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from sisav.academico.models import Curso, Disciplina, Matricula, Turma
+from sisav.academico.models import (
+    CriterioAvaliacao,
+    Curso,
+    Disciplina,
+    Matricula,
+    SubcriterioAvaliacao,
+    Turma,
+)
 from sisav.core.config import get_settings
 from sisav.usuarios.models import Aluno, Perfil, Usuario
 
@@ -14,6 +21,54 @@ CURSO_SEED = "Engenharia de Software"
 
 def hash_senha(senha: str) -> str:
     return bcrypt.hashpw(senha.encode(), bcrypt.gensalt()).decode()
+
+
+async def garantir_gestor_e_templates(db) -> None:
+    gestor = await db.scalar(
+        select(Usuario).where(Usuario.nome_de_usuario == "gestor.teste")
+    )
+    if gestor is None:
+        db.add(
+            Usuario(
+                nome="Gestor Teste",
+                nome_de_usuario="gestor.teste",
+                senha_hash=hash_senha("senha123"),
+                perfil=Perfil.GESTOR,
+            )
+        )
+
+    for disciplina in (await db.scalars(select(Disciplina))).all():
+        existente = await db.scalar(
+            select(CriterioAvaliacao.id)
+            .where(CriterioAvaliacao.disciplina_id == disciplina.id)
+            .limit(1)
+        )
+        if existente is not None:
+            continue
+
+        provas = CriterioAvaliacao(
+            disciplina_id=disciplina.id, ordem=1, nome="Provas", peso=100
+        )
+        trabalhos = CriterioAvaliacao(
+            disciplina_id=disciplina.id, ordem=2, nome="Trabalhos", peso=100
+        )
+        db.add_all([provas, trabalhos])
+        await db.flush()
+        db.add_all(
+            [
+                SubcriterioAvaliacao(
+                    criterio_id=provas.id, ordem=1, nome="P1", peso=60
+                ),
+                SubcriterioAvaliacao(
+                    criterio_id=provas.id, ordem=2, nome="P2", peso=40
+                ),
+                SubcriterioAvaliacao(
+                    criterio_id=trabalhos.id, ordem=1, nome="Trabalho final", peso=100
+                ),
+            ]
+        )
+
+    await db.commit()
 
 
 async def main() -> None:
@@ -38,6 +93,7 @@ async def main() -> None:
                 print("Aluno existente vinculado ao curso.")
             else:
                 print("Seed já aplicado, aluno id =", aluno_existente.id)
+            await garantir_gestor_e_templates(db)
             return
 
         aluno = Usuario(
@@ -77,6 +133,7 @@ async def main() -> None:
             Matricula(aluno_id=aluno.id, turma_id=t.id, ano_letivo=2026) for t in turmas
         )
         await db.commit()
+        await garantir_gestor_e_templates(db)
         print("Seed aplicado. aluno id =", aluno.id)
 
     await engine.dispose()
