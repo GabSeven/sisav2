@@ -43,6 +43,7 @@ async def registrar_faltas(
                 Turma.professor_id,
                 Turma.horario_inicio,
                 Turma.horario_fim,
+                Turma.fechada_em,
                 Disciplina.carga_horaria,
             )
             .join(Disciplina, Turma.disciplina_id == Disciplina.id)
@@ -51,9 +52,11 @@ async def registrar_faltas(
     ).first()
     if linha is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Turma não encontrada.")
-    professor_da_turma, inicio_turma, fim_turma, carga_horaria = linha
+    professor_da_turma, inicio_turma, fim_turma, fechada_em, carga_horaria = linha
     if professor_da_turma != professor.id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Você não leciona nesta turma.")
+    if fechada_em is not None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Turma já fechada.")
     if dados.horario_inicio != inicio_turma or dados.horario_fim != fim_turma:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT,

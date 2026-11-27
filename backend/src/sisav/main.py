@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from sisav.academico.avaliacao_router import router as avaliacao_router
+from sisav.academico.fechamento_router import router as fechamento_router
 from sisav.academico.frequencia_router import router as frequencia_router
 from sisav.academico.router import router as academico_router
+from sisav.academico.template_router import router as template_router
 from sisav.auth.router import router as auth_router
 from sisav.core.config import get_settings
 from sisav.notificacoes.router import router as notificacoes_router
@@ -26,10 +29,13 @@ app.add_middleware(
 )
 
 app.include_router(academico_router, prefix=settings.api_v1_prefix)
+app.include_router(avaliacao_router, prefix=settings.api_v1_prefix)
 app.include_router(auth_router, prefix=settings.api_v1_prefix)
+app.include_router(fechamento_router, prefix=settings.api_v1_prefix)
 app.include_router(frequencia_router, prefix=settings.api_v1_prefix)
 app.include_router(usuarios_router, prefix=settings.api_v1_prefix)
 app.include_router(notificacoes_router, prefix=settings.api_v1_prefix)
+app.include_router(template_router, prefix=settings.api_v1_prefix)
 
 settings.upload_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
