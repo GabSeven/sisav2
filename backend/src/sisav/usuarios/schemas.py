@@ -2,7 +2,9 @@ import re
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
+
 from sisav.usuarios.models import Perfil
+
 
 class PerfilResponse(BaseModel):
     nome: str

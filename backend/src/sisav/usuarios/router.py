@@ -11,6 +11,7 @@ from sisav.core.config import get_settings
 from sisav.core.db import get_db
 from sisav.usuarios.models import Aluno, Perfil, Usuario
 from sisav.usuarios.schemas import ContatoUpdateRequest, PerfilResponse, UsuarioBuscaItem
+
 router = APIRouter(prefix="/usuarios", tags=["Usuário"])
 
 async def montar_perfil(usuario: Usuario, db: AsyncSession) -> PerfilResponse:
