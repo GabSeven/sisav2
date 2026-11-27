@@ -1,4 +1,4 @@
-from sisav.academico.frequencia import (
+from sisav.academico.services.frequencia import (
     excedeu_limite,
     limite_de_faltas,
     percentual_de_faltas,

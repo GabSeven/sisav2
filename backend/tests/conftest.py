@@ -1,3 +1,5 @@
+from datetime import time
+
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -67,11 +69,11 @@ async def cenario(session_factory):
         await db.flush()
         db.add(Aluno(id=1, curso_id=curso.id))
         t1 = Turma(id=1, codigo="A", semestre="2026.1", sala="B-101", dia_semana="quarta",
-                   horario_inicio="10:00", horario_fim="11:40", disciplina_id=1)
+                   horario_inicio=time(10, 0), horario_fim=time(11, 40), disciplina_id=1)
         t2 = Turma(id=2, codigo="B", semestre="2026.1", sala="I-12", dia_semana="segunda",
-                   horario_inicio="08:00", horario_fim="09:40", disciplina_id=2)
+                   horario_inicio=time(8, 0), horario_fim=time(9, 40), disciplina_id=2)
         t3 = Turma(id=3, codigo="A", semestre="2026.2", sala="B-103", dia_semana="sexta",
-                   horario_inicio="08:00", horario_fim="09:40", disciplina_id=2)
+                   horario_inicio=time(8, 0), horario_fim=time(9, 40), disciplina_id=2)
         db.add_all([t1, t2, t3])
         await db.flush()
         db.add_all([

@@ -1,3 +1,5 @@
+from datetime import time
+
 import pytest_asyncio
 
 from sisav.academico.models import Disciplina, Matricula, Turma
@@ -8,9 +10,17 @@ from sisav.usuarios.models import Perfil, Usuario
 URL = "/api/v1/avaliacao-frequencia/turmas/{}/faltas"
 
 
-def corpo(data: str, aulas: int, faltas: dict[int, int]) -> dict:
+def corpo(
+    data: str,
+    aulas: int,
+    faltas: dict[int, int],
+    inicio: str = "08:00",
+    fim: str = "09:40",
+) -> dict:
     return {
         "data": data,
+        "horario_inicio": inicio,
+        "horario_fim": fim,
         "aulas_no_dia": aulas,
         "registros": [{"matricula_id": m, "faltas": f} for m, f in faltas.items()],
     }
@@ -65,8 +75,8 @@ async def cenario_frequencia(session_factory):
                     semestre="2026.2",
                     sala="I-12",
                     dia_semana="segunda",
-                    horario_inicio="08:00",
-                    horario_fim="09:40",
+                    horario_inicio=time(8, 0),
+                    horario_fim=time(9, 40),
                     disciplina_id=1,
                     professor_id=10,
                 ),
@@ -76,8 +86,8 @@ async def cenario_frequencia(session_factory):
                     semestre="2026.2",
                     sala="I-13",
                     dia_semana="terca",
-                    horario_inicio="08:00",
-                    horario_fim="09:40",
+                    horario_inicio=time(8, 0),
+                    horario_fim=time(9, 40),
                     disciplina_id=1,
                     professor_id=11,
                 ),
