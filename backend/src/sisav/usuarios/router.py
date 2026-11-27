@@ -4,7 +4,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sisav.academico.service import nome_do_curso
+from sisav.academico.services.curso import nome_do_curso
 from sisav.auth.dependencies import get_current_user_id
 from sisav.core.config import get_settings
 from sisav.core.db import get_db

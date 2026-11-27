@@ -3,8 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
-from sisav.academico.calculo import de_centesimos
 from sisav.academico.models import SituacaoAluno, TipoAvaliacao
+from sisav.academico.services.calculo import de_centesimos
 
 
 def _serializar_data_hora(valor: datetime | None) -> str | None:

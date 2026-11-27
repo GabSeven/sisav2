@@ -5,19 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sisav.academico.agregacao import (
-    criterios_da_matricula,
-    exame_da_turma,
-    folhas_de_nota,
-    valor_da_nota,
-)
-from sisav.academico.avaliacao_router import turma_do_professor
-from sisav.academico.avaliacao_schemas import (
-    ConsolidacaoResponse,
-    ConsolidacaoTurmaResponse,
-)
-from sisav.academico.calculo import calcular_situacao, media_pre_exame
-from sisav.academico.frequencia import excedeu_limite, limite_de_faltas
 from sisav.academico.models import (
     Avaliacao,
     ConsolidacaoAluno,
@@ -25,29 +12,24 @@ from sisav.academico.models import (
     Matricula,
     Nota,
     RegistroFrequencia,
-    Turma,
 )
+from sisav.academico.schemas.avaliacoes import (
+    ConsolidacaoResponse,
+    ConsolidacaoTurmaResponse,
+)
+from sisav.academico.services.agregacao import (
+    criterios_da_matricula,
+    exame_da_turma,
+    folhas_de_nota,
+    valor_da_nota,
+)
+from sisav.academico.services.calculo import calcular_situacao, media_pre_exame
+from sisav.academico.services.frequencia import excedeu_limite, limite_de_faltas
+from sisav.academico.services.permissoes import turma_do_professor, turma_para_leitura
 from sisav.auth.dependencies import get_current_user_id
 from sisav.core.db import get_db
-from sisav.usuarios.models import Perfil, Usuario
 
 router = APIRouter(prefix="/avaliacao-frequencia", tags=["Avaliação e Frequência"])
-
-
-async def turma_para_leitura(
-    turma_id: int, usuario_id: int, db: AsyncSession
-) -> Turma:
-    turma = await db.get(Turma, turma_id)
-    if turma is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Turma não encontrada.")
-    usuario = await db.get(Usuario, usuario_id)
-    if usuario is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário não encontrado.")
-    if usuario.perfil != Perfil.GESTOR and turma.professor_id != usuario_id:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN, "Acesso restrito ao professor da turma."
-        )
-    return turma
 
 
 @router.post(

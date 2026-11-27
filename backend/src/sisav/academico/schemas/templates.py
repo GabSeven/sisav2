@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
-from sisav.academico.calculo import de_centesimos
+from sisav.academico.services.calculo import de_centesimos
 
 
 class SubcriterioPayload(BaseModel):

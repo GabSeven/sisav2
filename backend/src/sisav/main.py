@@ -2,11 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from sisav.academico.avaliacao_router import router as avaliacao_router
-from sisav.academico.fechamento_router import router as fechamento_router
-from sisav.academico.frequencia_router import router as frequencia_router
-from sisav.academico.router import router as academico_router
-from sisav.academico.template_router import router as template_router
+from sisav.academico.routers.avaliacoes import router as avaliacao_router
+from sisav.academico.routers.fechamento import router as fechamento_router
+from sisav.academico.routers.frequencia import router as frequencia_router
+from sisav.academico.routers.grade import router as academico_router
+from sisav.academico.routers.templates import router as template_router
 from sisav.auth.router import router as auth_router
 from sisav.core.config import get_settings
 from sisav.notificacoes.router import router as notificacoes_router

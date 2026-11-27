@@ -5,31 +5,19 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from sisav.academico.calculo import para_centesimos
 from sisav.academico.models import CriterioAvaliacao, Disciplina, SubcriterioAvaliacao
-from sisav.academico.template_schemas import (
+from sisav.academico.schemas.templates import (
     CriterioResponse,
     SalvarTemplateRequest,
     SubcriterioResponse,
     TemplateResponse,
 )
+from sisav.academico.services.calculo import para_centesimos
+from sisav.academico.services.permissoes import exigir_gestor
 from sisav.auth.dependencies import get_current_user_id
 from sisav.core.db import get_db
-from sisav.usuarios.models import Perfil, Usuario
 
 router = APIRouter(prefix="/disciplinas", tags=["Acadêmico"])
-
-
-async def exigir_gestor(
-    usuario_id: int, db: AsyncSession
-) -> None:
-    usuario = await db.get(Usuario, usuario_id)
-    if usuario is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário não encontrado.")
-    if usuario.perfil != Perfil.GESTOR:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN, "Acesso restrito a gestores."
-        )
 
 
 async def montar_resposta(disciplina: Disciplina, db: AsyncSession) -> TemplateResponse:

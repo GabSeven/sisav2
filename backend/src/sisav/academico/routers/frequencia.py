@@ -4,30 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sisav.academico.frequencia import excedeu_limite, limite_de_faltas, percentual_de_faltas
-from sisav.academico.frequencia_schemas import (
+from sisav.academico.models import Disciplina, Matricula, RegistroFrequencia, Turma
+from sisav.academico.schemas.frequencia import (
     AlunoFrequenciaResponse,
     FaltasTurmaResponse,
     RegistrarFaltasRequest,
 )
-from sisav.academico.models import Disciplina, Matricula, RegistroFrequencia, Turma
-from sisav.auth.dependencies import get_current_user_id
+from sisav.academico.services.frequencia import (
+    excedeu_limite,
+    limite_de_faltas,
+    percentual_de_faltas,
+)
+from sisav.academico.services.permissoes import get_professor_atual
 from sisav.core.db import get_db
-from sisav.usuarios.models import Perfil, Usuario
+from sisav.usuarios.models import Usuario
 
 router = APIRouter(prefix="/avaliacao-frequencia", tags=["Avaliação e Frequência"])
-
-
-async def get_professor_atual(
-    usuario_id: Annotated[int, Depends(get_current_user_id)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-) -> Usuario:
-    usuario = await db.get(Usuario, usuario_id)
-    if usuario is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário não encontrado.")
-    if usuario.perfil != Perfil.PROFESSOR:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Acesso restrito a professores.")
-    return usuario
 
 
 @router.put("/turmas/{turma_id}/faltas", response_model=FaltasTurmaResponse)

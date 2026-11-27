@@ -1,6 +1,7 @@
 import pytest
 
-from sisav.academico.calculo import (
+from sisav.academico.models import SituacaoAluno
+from sisav.academico.services.calculo import (
     CriterioNotas,
     FolhaNota,
     arredondar_uma_casa,
@@ -10,7 +11,6 @@ from sisav.academico.calculo import (
     media_pre_exame,
     para_centesimos,
 )
-from sisav.academico.models import SituacaoAluno
 
 
 def test_arredondamento_para_uma_casa_meio_para_cima():

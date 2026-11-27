@@ -7,24 +7,6 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from sisav.academico.agregacao import (
-    criterios_da_matricula,
-    exame_da_turma,
-    valor_da_nota,
-)
-from sisav.academico.avaliacao_schemas import (
-    AvaliacaoResponse,
-    BoletimResponse,
-    BoletimTurmaResponse,
-    CriarAvaliacaoRequest,
-    EditarAvaliacaoRequest,
-    LancarNotasRequest,
-    NotaAvaliacaoResponse,
-    NotaResponse,
-    NotasLancadasResponse,
-)
-from sisav.academico.calculo import calcular_situacao, media_pre_exame, para_centesimos
-from sisav.academico.frequencia import excedeu_limite, limite_de_faltas
 from sisav.academico.models import (
     Avaliacao,
     ConsolidacaoAluno,
@@ -36,24 +18,34 @@ from sisav.academico.models import (
     TipoAvaliacao,
     Turma,
 )
+from sisav.academico.schemas.avaliacoes import (
+    AvaliacaoResponse,
+    BoletimResponse,
+    BoletimTurmaResponse,
+    CriarAvaliacaoRequest,
+    EditarAvaliacaoRequest,
+    LancarNotasRequest,
+    NotaAvaliacaoResponse,
+    NotaResponse,
+    NotasLancadasResponse,
+)
+from sisav.academico.services.agregacao import (
+    criterios_da_matricula,
+    exame_da_turma,
+    valor_da_nota,
+)
+from sisav.academico.services.calculo import (
+    calcular_situacao,
+    media_pre_exame,
+    para_centesimos,
+)
+from sisav.academico.services.frequencia import excedeu_limite, limite_de_faltas
+from sisav.academico.services.permissoes import turma_do_professor
 from sisav.auth.dependencies import get_current_user_id
 from sisav.core.db import get_db
 from sisav.usuarios.models import Perfil, Usuario
 
 router = APIRouter(prefix="/avaliacao-frequencia", tags=["Avaliação e Frequência"])
-
-
-async def turma_do_professor(
-    turma_id: int, professor_id: int, db: AsyncSession
-) -> Turma:
-    turma = await db.get(Turma, turma_id)
-    if turma is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Turma não encontrada.")
-    if turma.professor_id != professor_id:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Você não leciona nesta turma.")
-    if turma.fechada_em is not None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Turma já fechada.")
-    return turma
 
 
 @router.post(

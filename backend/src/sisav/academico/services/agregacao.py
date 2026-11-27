@@ -3,8 +3,8 @@
 from collections import defaultdict
 from collections.abc import Sequence
 
-from sisav.academico.calculo import CriterioNotas, FolhaNota
 from sisav.academico.models import Avaliacao, Nota, TipoAvaliacao
+from sisav.academico.services.calculo import CriterioNotas, FolhaNota
 
 MapaNotas = dict[tuple[int, int], Nota]
 
