@@ -39,16 +39,26 @@ async def registrar_faltas(
 ) -> FaltasTurmaResponse:
     linha = (
         await db.execute(
-            select(Turma.professor_id, Disciplina.carga_horaria)
+            select(
+                Turma.professor_id,
+                Turma.horario_inicio,
+                Turma.horario_fim,
+                Disciplina.carga_horaria,
+            )
             .join(Disciplina, Turma.disciplina_id == Disciplina.id)
             .where(Turma.id == turma_id)
         )
     ).first()
     if linha is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Turma não encontrada.")
-    professor_da_turma, carga_horaria = linha
+    professor_da_turma, inicio_turma, fim_turma, carga_horaria = linha
     if professor_da_turma != professor.id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Você não leciona nesta turma.")
+    if dados.horario_inicio != inicio_turma or dados.horario_fim != fim_turma:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "O bloco informado não corresponde ao horário da turma.",
+        )
 
     matriculas = (
         await db.execute(
@@ -74,6 +84,8 @@ async def registrar_faltas(
                 select(RegistroFrequencia).where(
                     RegistroFrequencia.matricula_id.in_(ids_da_turma),
                     RegistroFrequencia.data == dados.data,
+                    RegistroFrequencia.horario_inicio == dados.horario_inicio,
+                    RegistroFrequencia.horario_fim == dados.horario_fim,
                 )
             )
         ).all()
@@ -83,7 +95,11 @@ async def registrar_faltas(
         if registro is None:
             db.add(
                 RegistroFrequencia(
-                    matricula_id=item.matricula_id, data=dados.data, faltas=item.faltas
+                    matricula_id=item.matricula_id,
+                    data=dados.data,
+                    horario_inicio=dados.horario_inicio,
+                    horario_fim=dados.horario_fim,
+                    faltas=item.faltas,
                 )
             )
         else:
@@ -113,4 +129,10 @@ async def registrar_faltas(
         )
         for matricula_id, nome in matriculas
     ]
-    return FaltasTurmaResponse(turma_id=turma_id, data=dados.data, alunos=alunos)
+    return FaltasTurmaResponse(
+        turma_id=turma_id,
+        data=dados.data,
+        horario_inicio=dados.horario_inicio,
+        horario_fim=dados.horario_fim,
+        alunos=alunos,
+    )

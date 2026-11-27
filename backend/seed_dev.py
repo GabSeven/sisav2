@@ -1,4 +1,5 @@
 import asyncio
+from datetime import time
 
 import bcrypt
 from sqlalchemy import select
@@ -60,13 +61,13 @@ async def main() -> None:
 
         turmas = [
             Turma(codigo="A", semestre="2026.1", sala="B-101", dia_semana="segunda",
-                  horario_inicio="08:00", horario_fim="09:40",
+                  horario_inicio=time(8, 0), horario_fim=time(9, 40),
                   disciplina_id=calculo.id, professor_id=professor.id),
             Turma(codigo="B", semestre="2026.1", sala="I-12", dia_semana="quarta",
-                  horario_inicio="10:00", horario_fim="11:40",
+                  horario_inicio=time(10, 0), horario_fim=time(11, 40),
                   disciplina_id=construcao.id, professor_id=professor.id),
             Turma(codigo="A", semestre="2026.2", sala="B-103", dia_semana="sexta",
-                  horario_inicio="08:00", horario_fim="09:40",
+                  horario_inicio=time(8, 0), horario_fim=time(9, 40),
                   disciplina_id=construcao.id, professor_id=professor.id),
         ]
         db.add_all(turmas)
